@@ -5,7 +5,7 @@
 # Version 0.0.2 : 31/05/2013, used a for loop.
 # Version 0.0.3 : 26/12/2013, formated "time" output.
 export TIME="Time=%es Memory=%MkB"
-PROGRAM="time ../Binaries/SudokuSolver"
+PROGRAM="time ../Binaries/Sudoku_Solver"
 
 function PrintFailure
 {

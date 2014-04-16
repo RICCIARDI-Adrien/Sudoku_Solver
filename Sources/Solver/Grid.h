@@ -5,6 +5,7 @@
  * @version 1.1 : 31/05/2013, the list returned by GridGetCellMissingNumbers() is now in the right order as it seems to save a lot of cycles in the backtrack algorithm.
  * @version 1.2 : 16/06/2013, added GridGetEmptyCellsCount().
  * @version 1.3 : 25/08/2013, used bitmasks of all rows, columns and squares instead of cell lists.
+ * @version 1.4 : 16/04/2014, using a struct to represent each cells and added cell access monitoring to avoid infinite loops.
  */
 #ifndef H_GRID_H
 #define H_GRID_H

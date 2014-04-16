@@ -10,7 +10,7 @@ SOLVER_OBJECTS = $(OBJECTS_DIR)/Main.o $(OBJECTS_DIR)/Grid.o
 CONVERTER_OBJECTS = $(OBJECTS_DIR)/Converter.o
 
 all: $(SOLVER_OBJECTS) $(CONVERTER_OBJECTS)
-	$(CC) $(CCFLAGS) $(SOLVER_OBJECTS) -o $(BINARIES_DIR)/SudokuSolver
+	$(CC) $(CCFLAGS) $(SOLVER_OBJECTS) -o $(BINARIES_DIR)/Sudoku_Solver
 	$(CC) $(CCFLAGS) $(CONVERTER_OBJECTS) -o $(BINARIES_DIR)/Converter
 
 release: CCFLAGS += -O3 -fexpensive-optimizations -ffast-math -Wl,--strip-all

@@ -11,6 +11,7 @@
  * @version 1.0.2 : 15/06/2013, improved speed a bit by using statically allocated custom lists.
  * @version 1.0.3 : 16/06/2013, added status report displaying.
  * @version 1.1.0 : 25/08/2013, used other approach with bitmasks for rows, columns and squares to greatly improve speed (about 90 times faster).
+ * @version 1.1.1 : 16/04/2014, used a structure to represent a cell and optimized solving speed.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -37,7 +38,11 @@ int Backtrack(void)
 	{
 		// No empty cell remain and there is no error in the grid : the solution has been found
 		if (GridIsCorrectlyFilled()) return 1;
+		
 		// A bad grid was generated...
+		#ifdef DEBUG
+			printf("[Backtrack] Bad grid generated !\n");
+		#endif
 		return 0;
 	}
 	

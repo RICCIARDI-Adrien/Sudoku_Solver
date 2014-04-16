@@ -11,24 +11,29 @@
 //--------------------------------------------------------------------------------------------------------
 // Macros
 //--------------------------------------------------------------------------------------------------------
-/** Macro allowing easy access to grid cells regardless of its size.
- * @param Row Row coordinate.
- * @param Column Column coordinate.
+/** Get the square index (in the Bitmask_Squares array) in which the cell is located. The formula is Square_Row * Squares_Horizontal_Count + Square_Column.
+ * @param Row Cell row coordinate.
+ * @param Column Cell column coordinate.
+ * @return The square index in the Bitmask_Squares array.
  */
-#define GRID_CELL(Row, Column) Grid[(Row) * Grid_Size + (Column)]
+#define GRID_GET_CELL_SQUARE_INDEX(Row, Column) ((Row / Square_Height) * Squares_Horizontal_Count + (Column / Square_Width))
 
-/** Get the square in which the cell is located. The formula is Square_Row * Squares_Horizontal_Count + Square_Column.
- * @param Row Row coordinate.
- * @param Column Column coordinate.
- */
-#define GET_CELL_SQUARE(Row, Column) ((Row / Square_Height) * Squares_Horizontal_Count + (Column / Square_Width))
+//--------------------------------------------------------------------------------------------------------
+// Types
+//--------------------------------------------------------------------------------------------------------
+/** A grid cell. */
+typedef struct
+{
+	int Value; //! The cell value.
+	int Write_Accesses_Count; //! How many times the cell value has been modified.
+} TCell;
 
 //--------------------------------------------------------------------------------------------------------
 // Variables
 //--------------------------------------------------------------------------------------------------------
 // The grid
-static unsigned char Grid[GRID_MAXIMUM_SIZE * GRID_MAXIMUM_SIZE];
-// Grid side size in cells
+static TCell Grid[GRID_MAXIMUM_SIZE][GRID_MAXIMUM_SIZE];
+// Current grid side size in cells
 static int Grid_Size;
 // Dimensions of a square in cells
 static int Square_Width, Square_Height, Squares_Horizontal_Count, Squares_Vertical_Count;
@@ -41,198 +46,13 @@ static unsigned int Bitmask_Columns[GRID_MAXIMUM_SIZE];
 static unsigned int Bitmask_Squares[GRID_MAXIMUM_SIZE];
 
 //--------------------------------------------------------------------------------------------------------
-// Functions
+// Private functions
 //--------------------------------------------------------------------------------------------------------
-void GridShow(void)
-{
-	int Row, Column;
-	
-	for (Row = 0; Row < Grid_Size; Row++)
-	{
-		for (Column = 0; Column < Grid_Size; Column++)
-		{
-			if (GRID_CELL(Row, Column) == GRID_EMPTY_CELL_VALUE) printf(" . ");
-			else printf("%2d ", GRID_CELL(Row, Column));
-		}
-		putchar('\n');
-	}
-}
-
-void GridShowDifferences(int Color_Code)
-{
-	static unsigned char Last_Grid[GRID_MAXIMUM_SIZE * GRID_MAXIMUM_SIZE];
-	int Row, Column;
-	unsigned char Has_Color_Changed, Current_Cell_Value;
-	
-	for (Row = 0; Row < Grid_Size; Row++)
-	{
-		for (Column = 0; Column < Grid_Size; Column++)
-		{
-			// Change terminal color if there is a difference between cells
-			Has_Color_Changed = 0;
-			Current_Cell_Value = GRID_CELL(Row, Column);
-			if (Last_Grid[Row * Grid_Size + Column] != Current_Cell_Value)
-			{
-				if (Color_Code == GRID_COLOR_CODE_BLUE) printf("\x1B[34m"); // VT100 escape sequence
-				else printf("\x1B[31m"); // VT100 escape sequence
-				Has_Color_Changed = 1;
-			}
-			
-			if (Current_Cell_Value == GRID_EMPTY_CELL_VALUE) printf(" . ");
-			else printf("%2d ", Current_Cell_Value);
-			
-			// Restore terminal color
-			if (Has_Color_Changed) printf("\x1B[0m");
-			
-			// Update grid in the same time
-			Last_Grid[Row * Grid_Size + Column] = Current_Cell_Value;
-		}
-		putchar('\n');
-	}
-}
-
-unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
-{
-	unsigned int Bitmask_Missing_Numbers, Square_Index;
-	
-	// No need to check a filled cell
-	if (GRID_CELL(Cell_Row, Cell_Column) != GRID_EMPTY_CELL_VALUE) return 0;
-	
-	// Determinate the index of the square where the cell is located
-	Square_Index = GET_CELL_SQUARE(Cell_Row, Cell_Column);
-	
-	// Find missing numbers simultaneously on the row, the column and the square of the cell
-	Bitmask_Missing_Numbers = Bitmask_Rows[Cell_Row] & Bitmask_Columns[Cell_Column] & Bitmask_Squares[Square_Index];
-	return Bitmask_Missing_Numbers;
-}
-
-int GridIsCorrectlyFilled(void)
-{
-	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number;
-	char Is_Number_Found[GRID_MAXIMUM_SIZE + 1];
-	
-	// Check each row correctness
-	for (Row = 0; Row < Grid_Size; Row++)
-	{
-		// Reset boolean array of found numbers
-		memset(Is_Number_Found, 0, Grid_Size + 1);
-		
-		// Find all filled numbers
-		for (Column = 0; Column < Grid_Size; Column++)
-		{
-			Number = GRID_CELL(Row, Column);
-			if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
-			if (Is_Number_Found[Number]) return 0; // The number is present more than one time
-			Is_Number_Found[Number] = 1;
-		}
-	}
-	
-	// Check each column correctness
-	for (Column = 0; Column < Grid_Size; Column++)
-	{
-		// Reset boolean array of found numbers
-		memset(Is_Number_Found, 0, Grid_Size + 1);
-		
-		// Find all filled numbers
-		for (Row = 0; Row < Grid_Size; Row++)
-		{
-			Number = GRID_CELL(Row, Column);
-			if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
-			if (Is_Number_Found[Number]) return 0; // The number is present more than one time
-			Is_Number_Found[Number] = 1;
-		}
-	}
-	
-	// Check each cell in each square
-	for (Cell_Row = 0; Cell_Row < Grid_Size; Cell_Row++)
-	{
-		for (Cell_Column = 0; Cell_Column < Grid_Size; Cell_Column++)
-		{
-			// Reset boolean array of found numbers
-			memset(Is_Number_Found, 0, Grid_Size + 1);
-			
-			// Determine coordinates of the square where the cell is located
-			Row = (Cell_Row / Square_Height) * Square_Height;
-			Column_Start = (Cell_Column / Square_Width) * Square_Width;
-			Row_End = Row + Square_Height;
-			Column_End = Column_Start + Square_Width;
-			
-			// Find numbers present into the square
-			for ( ; Row < Row_End; Row++)
-			{
-				for (Column = Column_Start; Column < Column_End; Column++)
-				{
-					Number = GRID_CELL(Row, Column);
-					if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
-					if (Is_Number_Found[Number]) return 0; // The number is present more than one time
-					Is_Number_Found[Number] = 1;
-				}
-			}
-		}
-	}
-	return 1;
-}
-
-int GridGetFirstEmptyCell(int *Pointer_Row, int *Pointer_Column)
-{
-	int Row, Column;
-	
-	// Find the first empty cell
-	for (Row = 0; Row < Grid_Size; Row++)
-	{
-		for (Column = 0; Column < Grid_Size; Column++)
-		{
-			if (GRID_CELL(Row, Column) == GRID_EMPTY_CELL_VALUE) // An empty cell was found
-			{
-				*Pointer_Row = Row;
-				*Pointer_Column = Column;
-				return 1;
-			}
-		}
-	}
-	return 0; // All cells are filled in
-}
-
-void GridSetCellValue(int Cell_Row, int Cell_Column, char Cell_Value)
-{
-	// Check coordinates in debug mode
-	#ifdef DEBUG
-		assert(Cell_Row >= 0);
-		assert(Cell_Row < Grid_Size);
-		assert(Cell_Column >= 0);
-		assert(Cell_Column < Grid_Size);
-	#endif
-	GRID_CELL(Cell_Row, Cell_Column) = Cell_Value;
-}
-
-#ifdef DEBUG
-	void GridShowBitmask(unsigned int Bitmask)
-	{
-		int i, j = 0;
-		
-		for (i = Grid_Size; i >= 0 ; i--)
-		{
-			// Show '1' or '0' according to bit value
-			if (Bitmask & (1 << i)) putchar('1');
-			else putchar('0');
-				
-			// Make 4-bit groups to ease reading
-			j++;
-			if (j == 4)
-			{
-				putchar(' ');
-				j = 0;
-			}
-		}
-		printf("\n");
-	}
-#endif
-
 /** Create the initial bitmasks for all rows, columns and squares. */
 static inline void GridGenerateInitialBitmasks(void)
 {
 	int Row, Column, Number, Column_Start, Row_End, Column_End, Square_Row, Square_Column, i;
-	char Is_Number_Found[GRID_MAXIMUM_SIZE + 1]; // We need to bypass the 0 value which represents an empty cell
+	int Is_Number_Found[GRID_MAXIMUM_SIZE + 1]; // We need to bypass the 0 value which represents an empty cell
 	
 	// Parse all rows
 	for (Row = 0; Row < Grid_Size; Row++)
@@ -244,7 +64,7 @@ static inline void GridGenerateInitialBitmasks(void)
 		// Find available numbers
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			Number = GRID_CELL(Row, Column);
+			Number = Grid[Row][Column].Value;
 			Is_Number_Found[Number] = 1;
 		}
 		
@@ -265,7 +85,7 @@ static inline void GridGenerateInitialBitmasks(void)
 		// Find available numbers
 		for (Row = 0; Row < Grid_Size; Row++)
 		{
-			Number = GRID_CELL(Row, Column);
+			Number = Grid[Row][Column].Value;
 			Is_Number_Found[Number] = 1;
 		}
 		
@@ -298,7 +118,7 @@ static inline void GridGenerateInitialBitmasks(void)
 			{
 				for (Column = Column_Start; Column < Column_End; Column++)
 				{
-					Number = GRID_CELL(Row, Column);
+					Number = Grid[Row][Column].Value;
 					Is_Number_Found[Number] = 1;
 				}
 			}
@@ -313,6 +133,138 @@ static inline void GridGenerateInitialBitmasks(void)
 			i++;
 		}
 	}
+}
+
+//--------------------------------------------------------------------------------------------------------
+// Public functions
+//--------------------------------------------------------------------------------------------------------
+void GridShow(void)
+{
+	int Row, Column, Value;
+	
+	for (Row = 0; Row < Grid_Size; Row++)
+	{
+		for (Column = 0; Column < Grid_Size; Column++)
+		{
+			Value = Grid[Row][Column].Value;
+			if (Value == GRID_EMPTY_CELL_VALUE) printf(" . ");
+			else printf("%2d ", Value);
+		}
+		putchar('\n');
+	}
+}
+
+unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
+{
+	unsigned int Bitmask_Missing_Numbers, Square_Index;
+	
+	// No need to check a filled cell
+	if (Grid[Cell_Row][Cell_Column].Value != GRID_EMPTY_CELL_VALUE) return 0;
+	
+	// Determinate the index of the square where the cell is located
+	Square_Index = GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column);
+	
+	// Find missing numbers simultaneously on the row, the column and the square of the cell
+	Bitmask_Missing_Numbers = Bitmask_Rows[Cell_Row] & Bitmask_Columns[Cell_Column] & Bitmask_Squares[Square_Index];
+	return Bitmask_Missing_Numbers;
+}
+
+int GridIsCorrectlyFilled(void)
+{
+	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number, Is_Number_Found[GRID_MAXIMUM_SIZE + 1];
+	
+	// Check each row correctness
+	for (Row = 0; Row < Grid_Size; Row++)
+	{
+		// Reset boolean array of found numbers
+		memset(Is_Number_Found, 0, sizeof(Is_Number_Found));
+		
+		// Find all filled numbers
+		for (Column = 0; Column < Grid_Size; Column++)
+		{
+			Number = Grid[Row][Column].Value;
+			if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
+			if (Is_Number_Found[Number]) return 0; // The number is present more than one time
+			Is_Number_Found[Number] = 1;
+		}
+	}
+	
+	// Check each column correctness
+	for (Column = 0; Column < Grid_Size; Column++)
+	{
+		// Reset boolean array of found numbers
+		memset(Is_Number_Found, 0, sizeof(Is_Number_Found));
+		
+		// Find all filled numbers
+		for (Row = 0; Row < Grid_Size; Row++)
+		{
+			Number = Grid[Row][Column].Value;
+			if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
+			if (Is_Number_Found[Number]) return 0; // The number is present more than one time
+			Is_Number_Found[Number] = 1;
+		}
+	}
+	
+	// Check each cell in each square
+	for (Cell_Row = 0; Cell_Row < Grid_Size; Cell_Row++)
+	{
+		for (Cell_Column = 0; Cell_Column < Grid_Size; Cell_Column++)
+		{
+			// Reset boolean array of found numbers
+			memset(Is_Number_Found, 0, sizeof(Is_Number_Found));
+			
+			// Determine coordinates of the square where the cell is located
+			Row = (Cell_Row / Square_Height) * Square_Height;
+			Column_Start = (Cell_Column / Square_Width) * Square_Width;
+			Row_End = Row + Square_Height;
+			Column_End = Column_Start + Square_Width;
+			
+			// Find numbers present into the square
+			for ( ; Row < Row_End; Row++)
+			{
+				for (Column = Column_Start; Column < Column_End; Column++)
+				{
+					Number = Grid[Row][Column].Value;
+					if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
+					if (Is_Number_Found[Number]) return 0; // The number is present more than one time
+					Is_Number_Found[Number] = 1;
+				}
+			}
+		}
+	}
+	return 1;
+}
+
+int GridGetFirstEmptyCell(int *Pointer_Row, int *Pointer_Column)
+{
+	int Row, Column;
+	
+	// Find the first empty cell
+	for (Row = 0; Row < Grid_Size; Row++)
+	{
+		for (Column = 0; Column < Grid_Size; Column++)
+		{
+			if (Grid[Row][Column].Value == GRID_EMPTY_CELL_VALUE) // An empty cell was found
+			{
+				*Pointer_Row = Row;
+				*Pointer_Column = Column;
+				return 1;
+			}
+		}
+	}
+	return 0; // All cells are filled in
+}
+
+void GridSetCellValue(int Cell_Row, int Cell_Column, char Cell_Value)
+{
+	// Check coordinates in debug mode
+	#ifdef DEBUG
+		assert(Cell_Row >= 0);
+		assert(Cell_Row < Grid_Size);
+		assert(Cell_Column >= 0);
+		assert(Cell_Column < Grid_Size);
+	#endif
+	Grid[Cell_Row][Cell_Column].Value = Cell_Value;
 }
 
 int GridLoadFromFile(char *String_File_Name)
@@ -352,7 +304,7 @@ int GridLoadFromFile(char *String_File_Name)
 				fclose(File);
 				return -3;
 			}
-			GRID_CELL(Row, Column) = Temp;
+			Grid[Row][Column].Value = Temp;
 		}
 	}
 	
@@ -372,7 +324,7 @@ int GridGetEmptyCellsCount(void)
 	{
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			if (GRID_CELL(Row, Column) == GRID_EMPTY_CELL_VALUE) Empty_Cells_Count++;
+			if (Grid[Row][Column].Value == GRID_EMPTY_CELL_VALUE) Empty_Cells_Count++;
 		}
 	}
 	return Empty_Cells_Count;
@@ -387,7 +339,7 @@ void GridRemoveCellMissingNumber(int Cell_Row, int Cell_Column, int Number)
 	// Disable the Number bit in all relevant bitmasks
 	Bitmask_Rows[Cell_Row] &= New_Bitmask;
 	Bitmask_Columns[Cell_Column] &= New_Bitmask;
-	Bitmask_Squares[GET_CELL_SQUARE(Cell_Row, Cell_Column)] &= New_Bitmask;
+	Bitmask_Squares[GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column)] &= New_Bitmask;
 }
 
 void GridRestoreCellMissingNumber(int Cell_Row, int Cell_Column, int Number)
@@ -399,10 +351,65 @@ void GridRestoreCellMissingNumber(int Cell_Row, int Cell_Column, int Number)
 	// Disable the Number bit in all relevant bitmasks
 	Bitmask_Rows[Cell_Row] |= New_Bitmask;
 	Bitmask_Columns[Cell_Column] |= New_Bitmask;
-	Bitmask_Squares[GET_CELL_SQUARE(Cell_Row, Cell_Column)] |= New_Bitmask;
+	Bitmask_Squares[GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column)] |= New_Bitmask;
 }
 
 int GridGetSize(void)
 {
 	return Grid_Size;
 }
+
+#ifdef DEBUG
+	void GridShowBitmask(unsigned int Bitmask)
+	{
+		int i, j = 0;
+		
+		for (i = Grid_Size; i >= 0 ; i--)
+		{
+			// Show '1' or '0' according to bit value
+			if (Bitmask & (1 << i)) putchar('1');
+			else putchar('0');
+				
+			// Make 4-bit groups to ease reading
+			j++;
+			if (j == 4)
+			{
+				putchar(' ');
+				j = 0;
+			}
+		}
+		printf("\n");
+	}
+
+	void GridShowDifferences(int Color_Code)
+	{
+		static TCell Last_Grid[GRID_MAXIMUM_SIZE][GRID_MAXIMUM_SIZE];
+		int Row, Column, Has_Color_Changed, Current_Cell_Value;
+		
+		for (Row = 0; Row < Grid_Size; Row++)
+		{
+			for (Column = 0; Column < Grid_Size; Column++)
+			{
+				// Change terminal color if there is a difference between cells
+				Has_Color_Changed = 0;
+				Current_Cell_Value = Grid[Row][Column].Value;
+				if (Last_Grid[Row][Column].Value != Current_Cell_Value)
+				{
+					if (Color_Code == GRID_COLOR_CODE_BLUE) printf("\x1B[34m"); // VT100 escape sequence
+					else printf("\x1B[31m"); // VT100 escape sequence
+					Has_Color_Changed = 1;
+				}
+				
+				if (Current_Cell_Value == GRID_EMPTY_CELL_VALUE) printf(" . ");
+				else printf("%2d ", Current_Cell_Value);
+				
+				// Restore terminal color
+				if (Has_Color_Changed) printf("\x1B[0m");
+				
+				// Update grid in the same time
+				Last_Grid[Row][Column].Value = Current_Cell_Value;
+			}
+			putchar('\n');
+		}
+	}
+#endif
