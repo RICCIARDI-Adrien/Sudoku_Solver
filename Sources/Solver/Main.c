@@ -11,7 +11,7 @@
  * @version 1.0.2 : 15/06/2013, improved speed a bit by using statically allocated custom lists.
  * @version 1.0.3 : 16/06/2013, added status report displaying.
  * @version 1.1.0 : 25/08/2013, used other approach with bitmasks for rows, columns and squares to greatly improve speed (about 90 times faster).
- * @version 1.1.1 : 16/04/2014, used a structure to represent a cell and optimized solving speed.
+ * @version 1.1.1 : 16/04/2014, made a little optimization on grid access.
  */
 #include <stdio.h>
 #include <stdlib.h>
@@ -115,7 +115,7 @@ int main(int argc, char *argv[])
 			return -1;
 			
 		case -2:
-			printf("Error : grid size is bad.\nThe maximum allowed size is %d.\n", GRID_MAXIMUM_SIZE);
+			printf("Error : grid size is bad.\nThe maximum allowed size is %d.\n", CONFIGURATION_GRID_MAXIMUM_SIZE);
 			return -1;
 			
 		case -3:

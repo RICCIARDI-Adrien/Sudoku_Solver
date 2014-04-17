@@ -3,6 +3,7 @@
  * Copyright (C) 2013 Adrien RICCIARDI
  */
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "Configuration.h"
@@ -19,31 +20,21 @@
 #define GRID_GET_CELL_SQUARE_INDEX(Row, Column) ((Row / Square_Height) * Squares_Horizontal_Count + (Column / Square_Width))
 
 //--------------------------------------------------------------------------------------------------------
-// Types
-//--------------------------------------------------------------------------------------------------------
-/** A grid cell. */
-typedef struct
-{
-	int Value; //! The cell value.
-	int Write_Accesses_Count; //! How many times the cell value has been modified.
-} TCell;
-
-//--------------------------------------------------------------------------------------------------------
 // Variables
 //--------------------------------------------------------------------------------------------------------
 // The grid
-static TCell Grid[GRID_MAXIMUM_SIZE][GRID_MAXIMUM_SIZE];
+static int Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE];
 // Current grid side size in cells
 static int Grid_Size;
 // Dimensions of a square in cells
 static int Square_Width, Square_Height, Squares_Horizontal_Count, Squares_Vertical_Count;
 
 // All row bitmasks
-static unsigned int Bitmask_Rows[GRID_MAXIMUM_SIZE];
+static unsigned int Bitmask_Rows[CONFIGURATION_GRID_MAXIMUM_SIZE];
 // All column bitmasks
-static unsigned int Bitmask_Columns[GRID_MAXIMUM_SIZE];
+static unsigned int Bitmask_Columns[CONFIGURATION_GRID_MAXIMUM_SIZE];
 // All square bitmasks
-static unsigned int Bitmask_Squares[GRID_MAXIMUM_SIZE];
+static unsigned int Bitmask_Squares[CONFIGURATION_GRID_MAXIMUM_SIZE];
 
 //--------------------------------------------------------------------------------------------------------
 // Private functions
@@ -52,7 +43,7 @@ static unsigned int Bitmask_Squares[GRID_MAXIMUM_SIZE];
 static inline void GridGenerateInitialBitmasks(void)
 {
 	int Row, Column, Number, Column_Start, Row_End, Column_End, Square_Row, Square_Column, i;
-	int Is_Number_Found[GRID_MAXIMUM_SIZE + 1]; // We need to bypass the 0 value which represents an empty cell
+	int Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE + 1]; // We need to bypass the 0 value which represents an empty cell
 	
 	// Parse all rows
 	for (Row = 0; Row < Grid_Size; Row++)
@@ -64,7 +55,7 @@ static inline void GridGenerateInitialBitmasks(void)
 		// Find available numbers
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			Number = Grid[Row][Column].Value;
+			Number = Grid[Row][Column];
 			Is_Number_Found[Number] = 1;
 		}
 		
@@ -85,7 +76,7 @@ static inline void GridGenerateInitialBitmasks(void)
 		// Find available numbers
 		for (Row = 0; Row < Grid_Size; Row++)
 		{
-			Number = Grid[Row][Column].Value;
+			Number = Grid[Row][Column];
 			Is_Number_Found[Number] = 1;
 		}
 		
@@ -118,7 +109,7 @@ static inline void GridGenerateInitialBitmasks(void)
 			{
 				for (Column = Column_Start; Column < Column_End; Column++)
 				{
-					Number = Grid[Row][Column].Value;
+					Number = Grid[Row][Column];
 					Is_Number_Found[Number] = 1;
 				}
 			}
@@ -146,7 +137,7 @@ void GridShow(void)
 	{
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			Value = Grid[Row][Column].Value;
+			Value = Grid[Row][Column];
 			if (Value == GRID_EMPTY_CELL_VALUE) printf(" . ");
 			else printf("%2d ", Value);
 		}
@@ -159,7 +150,7 @@ unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
 	unsigned int Bitmask_Missing_Numbers, Square_Index;
 	
 	// No need to check a filled cell
-	if (Grid[Cell_Row][Cell_Column].Value != GRID_EMPTY_CELL_VALUE) return 0;
+	if (Grid[Cell_Row][Cell_Column] != GRID_EMPTY_CELL_VALUE) return 0;
 	
 	// Determinate the index of the square where the cell is located
 	Square_Index = GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column);
@@ -171,7 +162,7 @@ unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
 
 int GridIsCorrectlyFilled(void)
 {
-	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number, Is_Number_Found[GRID_MAXIMUM_SIZE + 1];
+	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number, Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE + 1];
 	
 	// Check each row correctness
 	for (Row = 0; Row < Grid_Size; Row++)
@@ -182,7 +173,7 @@ int GridIsCorrectlyFilled(void)
 		// Find all filled numbers
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			Number = Grid[Row][Column].Value;
+			Number = Grid[Row][Column];
 			if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
 			if (Is_Number_Found[Number]) return 0; // The number is present more than one time
 			Is_Number_Found[Number] = 1;
@@ -198,7 +189,7 @@ int GridIsCorrectlyFilled(void)
 		// Find all filled numbers
 		for (Row = 0; Row < Grid_Size; Row++)
 		{
-			Number = Grid[Row][Column].Value;
+			Number = Grid[Row][Column];
 			if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
 			if (Is_Number_Found[Number]) return 0; // The number is present more than one time
 			Is_Number_Found[Number] = 1;
@@ -224,7 +215,7 @@ int GridIsCorrectlyFilled(void)
 			{
 				for (Column = Column_Start; Column < Column_End; Column++)
 				{
-					Number = Grid[Row][Column].Value;
+					Number = Grid[Row][Column];
 					if (Number == GRID_EMPTY_CELL_VALUE) continue; // Ignore empty cells
 					if (Is_Number_Found[Number]) return 0; // The number is present more than one time
 					Is_Number_Found[Number] = 1;
@@ -244,7 +235,7 @@ int GridGetFirstEmptyCell(int *Pointer_Row, int *Pointer_Column)
 	{
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			if (Grid[Row][Column].Value == GRID_EMPTY_CELL_VALUE) // An empty cell was found
+			if (Grid[Row][Column] == GRID_EMPTY_CELL_VALUE) // An empty cell was found
 			{
 				*Pointer_Row = Row;
 				*Pointer_Column = Column;
@@ -255,7 +246,7 @@ int GridGetFirstEmptyCell(int *Pointer_Row, int *Pointer_Column)
 	return 0; // All cells are filled in
 }
 
-void GridSetCellValue(int Cell_Row, int Cell_Column, char Cell_Value)
+void GridSetCellValue(int Cell_Row, int Cell_Column, int Cell_Value)
 {
 	// Check coordinates in debug mode
 	#ifdef DEBUG
@@ -264,7 +255,7 @@ void GridSetCellValue(int Cell_Row, int Cell_Column, char Cell_Value)
 		assert(Cell_Column >= 0);
 		assert(Cell_Column < Grid_Size);
 	#endif
-	Grid[Cell_Row][Cell_Column].Value = Cell_Value;
+	Grid[Cell_Row][Cell_Column] = Cell_Value;
 }
 
 int GridLoadFromFile(char *String_File_Name)
@@ -278,7 +269,7 @@ int GridLoadFromFile(char *String_File_Name)
 	
 	// Retrieve grid size
 	fscanf(File, "%d", &Grid_Size);
-	if (Grid_Size > GRID_MAXIMUM_SIZE)
+	if (Grid_Size > CONFIGURATION_GRID_MAXIMUM_SIZE)
 	{		
 		fclose(File);
 		return -2;
@@ -304,7 +295,7 @@ int GridLoadFromFile(char *String_File_Name)
 				fclose(File);
 				return -3;
 			}
-			Grid[Row][Column].Value = Temp;
+			Grid[Row][Column] = Temp;
 		}
 	}
 	
@@ -324,7 +315,7 @@ int GridGetEmptyCellsCount(void)
 	{
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			if (Grid[Row][Column].Value == GRID_EMPTY_CELL_VALUE) Empty_Cells_Count++;
+			if (Grid[Row][Column] == GRID_EMPTY_CELL_VALUE) Empty_Cells_Count++;
 		}
 	}
 	return Empty_Cells_Count;
@@ -383,7 +374,7 @@ int GridGetSize(void)
 
 	void GridShowDifferences(int Color_Code)
 	{
-		static TCell Last_Grid[GRID_MAXIMUM_SIZE][GRID_MAXIMUM_SIZE];
+		static int Last_Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE];
 		int Row, Column, Has_Color_Changed, Current_Cell_Value;
 		
 		for (Row = 0; Row < Grid_Size; Row++)
@@ -392,8 +383,8 @@ int GridGetSize(void)
 			{
 				// Change terminal color if there is a difference between cells
 				Has_Color_Changed = 0;
-				Current_Cell_Value = Grid[Row][Column].Value;
-				if (Last_Grid[Row][Column].Value != Current_Cell_Value)
+				Current_Cell_Value = Grid[Row][Column];
+				if (Last_Grid[Row][Column] != Current_Cell_Value)
 				{
 					if (Color_Code == GRID_COLOR_CODE_BLUE) printf("\x1B[34m"); // VT100 escape sequence
 					else printf("\x1B[31m"); // VT100 escape sequence
@@ -407,7 +398,7 @@ int GridGetSize(void)
 				if (Has_Color_Changed) printf("\x1B[0m");
 				
 				// Update grid in the same time
-				Last_Grid[Row][Column].Value = Current_Cell_Value;
+				Last_Grid[Row][Column] = Current_Cell_Value;
 			}
 			putchar('\n');
 		}
