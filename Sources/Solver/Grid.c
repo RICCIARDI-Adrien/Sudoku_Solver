@@ -1,17 +1,18 @@
-/*
- * This file is part of the SudokuSolver project.
- * Copyright (C) 2013 Adrien RICCIARDI
+/** @file Grid.c
+ * @see Grid.h for description.
+ * @author Adrien RICCIARDI
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
 #include "Configuration.h"
+#include "Cells_Stack.h"
 #include "Grid.h"
 
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 // Macros
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 /** Get the square index (in the Bitmask_Squares array) in which the cell is located. The formula is Square_Row * Squares_Horizontal_Count + Square_Column.
  * @param Row Cell row coordinate.
  * @param Column Cell column coordinate.
@@ -19,9 +20,9 @@
  */
 #define GRID_GET_CELL_SQUARE_INDEX(Row, Column) ((Row / Square_Height) * Squares_Horizontal_Count + (Column / Square_Width))
 
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 // Variables
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 // The grid
 static int Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE];
 // Current grid side size in cells
@@ -36,9 +37,9 @@ static unsigned int Bitmask_Columns[CONFIGURATION_GRID_MAXIMUM_SIZE];
 // All square bitmasks
 static unsigned int Bitmask_Squares[CONFIGURATION_GRID_MAXIMUM_SIZE];
 
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 // Private functions
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 /** Create the initial bitmasks for all rows, columns and squares. */
 static inline void GridGenerateInitialBitmasks(void)
 {
@@ -126,9 +127,26 @@ static inline void GridGenerateInitialBitmasks(void)
 	}
 }
 
-//--------------------------------------------------------------------------------------------------------
+/** Fill the stack with empty cells. */
+static void GridFillStackWithEmptyCells(void)
+{
+	int Row, Column;
+	
+	CellsStackInitialize();
+	
+	// Reverse parsing to create a stack with empty coordinates beginning on the top-left part of the grid (this allows to make speed comparisons with the older way to find empty cells)
+	for (Row = Grid_Size - 1; Row >= 0; Row--)
+	{
+		for (Column = Grid_Size - 1; Column >= 0; Column--)
+		{
+			if (Grid[Row][Column] == GRID_EMPTY_CELL_VALUE) CellsStackPush(Row, Column);
+		}
+	}
+}
+
+//-------------------------------------------------------------------------------------------------
 // Public functions
-//--------------------------------------------------------------------------------------------------------
+//-------------------------------------------------------------------------------------------------
 void GridShow(void)
 {
 	int Row, Column, Value;
@@ -226,26 +244,6 @@ int GridIsCorrectlyFilled(void)
 	return 1;
 }
 
-int GridGetFirstEmptyCell(int *Pointer_Row, int *Pointer_Column)
-{
-	int Row, Column;
-	
-	// Find the first empty cell
-	for (Row = 0; Row < Grid_Size; Row++)
-	{
-		for (Column = 0; Column < Grid_Size; Column++)
-		{
-			if (Grid[Row][Column] == GRID_EMPTY_CELL_VALUE) // An empty cell was found
-			{
-				*Pointer_Row = Row;
-				*Pointer_Column = Column;
-				return 1;
-			}
-		}
-	}
-	return 0; // All cells are filled in
-}
-
 void GridSetCellValue(int Cell_Row, int Cell_Column, int Cell_Value)
 {
 	// Check coordinates in debug mode
@@ -299,11 +297,14 @@ int GridLoadFromFile(char *String_File_Name)
 		}
 	}
 	
+	// The grid was successfully loaded
+	fclose(File);
+	
 	// Create first bitmasks
 	GridGenerateInitialBitmasks();
 	
-	// File successfully loaded
-	fclose(File);
+	// Put the empty cells coordinates into the dedicated stack
+	GridFillStackWithEmptyCells();
 	return 0;
 }
 

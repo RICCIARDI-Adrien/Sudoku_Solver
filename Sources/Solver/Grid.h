@@ -10,6 +10,11 @@
 #ifndef H_GRID_H
 #define H_GRID_H
 
+#include "Cells_Stack.h"
+
+//-------------------------------------------------------------------------------------------------
+// Constants
+//-------------------------------------------------------------------------------------------------
 /** Blue terminal text color. */
 #define GRID_COLOR_CODE_BLUE 0
 /** Red terminal text color. */
@@ -18,6 +23,9 @@
 /** Value of an empty cell. */
 #define GRID_EMPTY_CELL_VALUE 0
 
+//-------------------------------------------------------------------------------------------------
+// Functions
+//-------------------------------------------------------------------------------------------------
 /** Print the grid to the screen. */
 void GridShow(void);
 
@@ -37,13 +45,6 @@ unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column);
  * @return 1 if the grid is correctly filled or 0 if not.
  */
 int GridIsCorrectlyFilled(void);
-
-/** Retrieve the coordinates of the first empty cell.
- * @param Pointer_Row Row coordinate of the first empty cell.
- * @param Pointer_Column Column coordinate of the first empty cell.
- * @return 1 if an empty cell was found or 0 if all cells are filled (in this case the values of Pointer_Row and Pointer_Column are undefined).
- */
-int GridGetFirstEmptyCell(int *Pointer_Row, int *Pointer_Column);
 
 /** Set the value of a cell.
  * @param Cell_Row Row coordinate of the cell.

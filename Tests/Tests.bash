@@ -9,17 +9,16 @@ PROGRAM="time ../Binaries/Sudoku_Solver"
 
 function PrintFailure
 {
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	echo "!! FAILURE !!"
-	echo "!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!"
-	exit
+	echo -e "\033[31m!!!!!!!!!!!!!"
+	echo -e "\033[31m!! FAILURE !!"
+	echo -e "\033[31m!!!!!!!!!!!!!\033[0m"
 }
 
 function PrintTotalSuccess
 {
-	echo "################################################################################"
-	echo "## SUCCESS : all tests were successful ##"
-	echo "################################################################################"
+	echo -e "\033[32m#########################################"
+	echo -e "\033[32m## SUCCESS : all tests were successful ##"
+	echo -e "\033[32m#########################################\033[0m"
 }
 
 # Solve all present grids
@@ -29,6 +28,7 @@ do
 	if [ $? != 0 ]
 	then
 		PrintFailure
+		exit
 	fi
 done
 

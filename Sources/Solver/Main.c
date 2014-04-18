@@ -12,12 +12,16 @@
  * @version 1.0.3 : 16/06/2013, added status report displaying.
  * @version 1.1.0 : 25/08/2013, used other approach with bitmasks for rows, columns and squares to greatly improve speed (about 90 times faster).
  * @version 1.1.1 : 16/04/2014, made a little optimization on grid access.
+ * @version 1.1.2 : 18/04/2014, used a stack to list the empty cells, the solving is more than 2 times faster.
  */
 #include <stdio.h>
 #include <stdlib.h>
 #include "Configuration.h"
 #include "Grid.h"
 
+//-------------------------------------------------------------------------------------------------
+// Private variables
+//-------------------------------------------------------------------------------------------------
 // How many loops were done
 static unsigned int Loops_Count = 1;
 // How many bad solutions were found before the good one (or before crashing...)
@@ -25,16 +29,19 @@ static unsigned int Bad_Solutions_Found_Count = 0;
 // Cache grid size value (and convert it to unsigned)
 static unsigned int Grid_Size;
 
+//-------------------------------------------------------------------------------------------------
+// Private functions
+//-------------------------------------------------------------------------------------------------
 /** The brute force backtrack algorithm.
  * @return 1 if the grid was solved or 0 if not.
  */
-int Backtrack(void)
+static int Backtrack(void)
 {
 	int Row, Column;
 	unsigned int Bitmask_Missing_Numbers, Tested_Number;
 	
-	// Find the first empty cell
-	if (GridGetFirstEmptyCell(&Row, &Column) == 0)
+	// Find the first empty cell (don't remove the stack top now as the backtrack can return soon if no available number is found) 
+	if (CellsStackReadTop(&Row, &Column) == 0)
 	{
 		// No empty cell remain and there is no error in the grid : the solution has been found
 		if (GridIsCorrectlyFilled()) return 1;
@@ -48,7 +55,7 @@ int Backtrack(void)
 	
 	// Get available numbers for this cell
 	Bitmask_Missing_Numbers = GridGetCellMissingNumbers(Row, Column);
-	// If no number is available a bad grid has been generated...
+	// If no number is available a bad grid has been generated... It's safe to return here as the top of the stack has not been altered
 	if (Bitmask_Missing_Numbers == 0) return 0;
 	
 	#ifdef DEBUG
@@ -65,21 +72,22 @@ int Backtrack(void)
 		// Try the number
 		GridSetCellValue(Row, Column, Tested_Number);
 		GridRemoveCellMissingNumber(Row, Column, Tested_Number);
+		CellsStackRemoveTop(); // Really try to fill this cell, removing it for next simulation step
+		Loops_Count++;
 		
 		#ifdef DEBUG
 			printf("[Backtrack] Modified grid :\n");
 			GridShowDifferences(GRID_COLOR_CODE_BLUE);
 			putchar('\n');
 		#endif
-		
-		Loops_Count++;
-		
+
 		// Simulate next state
 		if (Backtrack() == 1) return 1; // Good solution found, go to tree root
 		
 		// Bad solution found, restore old value
 		GridSetCellValue(Row, Column, GRID_EMPTY_CELL_VALUE);
 		GridRestoreCellMissingNumber(Row, Column, Tested_Number);
+		CellsStackPush(Row, Column); // The cell is available again
 		Bad_Solutions_Found_Count++;
 		
 		#ifdef DEBUG
@@ -92,6 +100,9 @@ int Backtrack(void)
 	return 0;
 }
 
+//-------------------------------------------------------------------------------------------------
+// Entry point
+//-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
 	// Show the title
