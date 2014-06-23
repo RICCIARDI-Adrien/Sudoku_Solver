@@ -10,15 +10,15 @@ PROGRAM="time ../Binaries/Sudoku_Solver"
 function PrintFailure
 {
 	echo -e "\033[31m!!!!!!!!!!!!!"
-	echo -e "\033[31m!! FAILURE !!"
-	echo -e "\033[31m!!!!!!!!!!!!!\033[0m"
+	echo -e "!! FAILURE !!"
+	echo -e "!!!!!!!!!!!!!\033[0m"
 }
 
 function PrintTotalSuccess
 {
 	echo -e "\033[32m#########################################"
-	echo -e "\033[32m## SUCCESS : all tests were successful ##"
-	echo -e "\033[32m#########################################\033[0m"
+	echo -e "## SUCCESS : all tests were successful ##"
+	echo -e "#########################################\033[0m"
 }
 
 # Solve all present grids
