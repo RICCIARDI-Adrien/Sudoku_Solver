@@ -9,15 +9,15 @@ BINARIES_DIR = Binaries
 SOLVER_OBJECTS = $(OBJECTS_DIR)/Main.o $(OBJECTS_DIR)/Grid.o $(OBJECTS_DIR)/Cells_Stack.o
 CONVERTER_OBJECTS = $(OBJECTS_DIR)/Converter.o
 
-all: $(SOLVER_OBJECTS) $(CONVERTER_OBJECTS)
-	$(CC) $(CCFLAGS) $(SOLVER_OBJECTS) -o $(BINARIES_DIR)/Sudoku_Solver
-	$(CC) $(CCFLAGS) $(CONVERTER_OBJECTS) -o $(BINARIES_DIR)/Converter
-
 release: CCFLAGS += -O3 -fexpensive-optimizations -ffast-math -Wl,--strip-all
 release: all
 
 debug: CCFLAGS += -DDEBUG -g
 debug: all
+
+all: $(SOLVER_OBJECTS) $(CONVERTER_OBJECTS)
+	$(CC) $(CCFLAGS) $(SOLVER_OBJECTS) -o $(BINARIES_DIR)/Sudoku_Solver
+	$(CC) $(CCFLAGS) $(CONVERTER_OBJECTS) -o $(BINARIES_DIR)/Converter
 
 $(OBJECTS_DIR)/Main.o: $(SOLVER_SOURCES_DIR)/Main.c $(SOLVER_SOURCES_DIR)/Configuration.h $(SOLVER_SOURCES_DIR)/Grid.h
 	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_DIR)/Main.c -o $(OBJECTS_DIR)/Main.o
