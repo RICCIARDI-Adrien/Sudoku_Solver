@@ -1,4 +1,4 @@
-/** @file e-sudoku_Converter.c
+/** @file Converter.c
  * Convert e-sudoku web site sudoku to SudokuSolver format.
  * @author Adrien RICCIARDI
  * @version 1.0 : 26/12/2013
@@ -7,12 +7,15 @@
 #include <stdlib.h>
 #include <string.h>
 
+//-------------------------------------------------------------------------------------------------
+// Private constants
+//-------------------------------------------------------------------------------------------------
 /** Size of the token buffer in bytes. */
 #define BUFFER_SIZE 32
 
-static FILE *File;
-static char Buffer[BUFFER_SIZE], Grid[BUFFER_SIZE * BUFFER_SIZE];
-
+//-------------------------------------------------------------------------------------------------
+// Private types
+//-------------------------------------------------------------------------------------------------
 typedef enum
 {
 	RESULT_READ_TOKEN_NO_ERROR, //! A token was successfully read.
@@ -20,10 +23,19 @@ typedef enum
 	RESULT_READ_TOKEN_EOF //! The end of the file was reached before a ';' was found.
 } TResultReadToken;
 
+//-------------------------------------------------------------------------------------------------
+// Private variables
+//-------------------------------------------------------------------------------------------------
+static FILE *File;
+static char Buffer[BUFFER_SIZE], Grid[BUFFER_SIZE * BUFFER_SIZE];
+
+//-------------------------------------------------------------------------------------------------
+// Private functions
+//-------------------------------------------------------------------------------------------------
 /** Read the file until the ';' character is found.
  * @return A TResultReadToken.
  */
-TResultReadToken ReadToken(void)
+static TResultReadToken ReadToken(void)
 {
 	int i;
 	
@@ -50,7 +62,7 @@ TResultReadToken ReadToken(void)
 /** Read the cell value from a token.
  * @return The cell value or -1 if an error occured.
  */
-int ReadCellValue(void)
+static int ReadCellValue(void)
 {
 	int i = 0;
 	char Cell_Value;
@@ -71,6 +83,9 @@ int ReadCellValue(void)
 	return Cell_Value;
 }
 
+//-------------------------------------------------------------------------------------------------
+// Entry point
+//-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
 	TResultReadToken Result_Read_Token;
