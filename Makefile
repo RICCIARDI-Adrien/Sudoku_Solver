@@ -1,35 +1,38 @@
+BINARIES_PATH = Binaries
+INCLUDES_PATH = Includes
+SOLVER_INCLUDES_PATH = $(INCLUDES_PATH)/Solver
+OBJECTS_PATH = Objects
+SOURCES_PATH = Sources
+SOLVER_SOURCES_PATH = $(SOURCES_PATH)/Solver
+CONVERTER_SOURCES_PATH = $(SOURCES_PATH)/Converter
+
+SOLVER_OBJECTS = $(OBJECTS_PATH)/Cells_Stack.o $(OBJECTS_PATH)/Grid.o $(OBJECTS_PATH)/Main.o
+CONVERTER_OBJECTS = $(OBJECTS_PATH)/Converter.o
+
 CC = gcc
-CCFLAGS = -W -Wall
+CCFLAGS = -W -Wall -I$(SOLVER_INCLUDES_PATH)
 
-SOLVER_SOURCES_DIR = Sources/Solver
-CONVERTER_SOURCES_DIR = Sources/Converter
-OBJECTS_DIR = Objects
-BINARIES_DIR = Binaries
-
-SOLVER_OBJECTS = $(OBJECTS_DIR)/Main.o $(OBJECTS_DIR)/Grid.o $(OBJECTS_DIR)/Cells_Stack.o
-CONVERTER_OBJECTS = $(OBJECTS_DIR)/Converter.o
-
-release: CCFLAGS += -O3 -fexpensive-optimizations -ffast-math -Wl,--strip-all
+release: CCFLAGS += -O3 -Wl,--strip-all
 release: all
 
 debug: CCFLAGS += -DDEBUG -g
 debug: all
 
 all: $(SOLVER_OBJECTS) $(CONVERTER_OBJECTS)
-	$(CC) $(CCFLAGS) $(SOLVER_OBJECTS) -o $(BINARIES_DIR)/Sudoku_Solver
-	$(CC) $(CCFLAGS) $(CONVERTER_OBJECTS) -o $(BINARIES_DIR)/Converter
+	$(CC) $(CCFLAGS) $(SOLVER_OBJECTS) -o $(BINARIES_PATH)/Sudoku_Solver
+	$(CC) $(CCFLAGS) $(CONVERTER_OBJECTS) -o $(BINARIES_PATH)/Converter
 
-$(OBJECTS_DIR)/Main.o: $(SOLVER_SOURCES_DIR)/Main.c $(SOLVER_SOURCES_DIR)/Configuration.h $(SOLVER_SOURCES_DIR)/Grid.h
-	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_DIR)/Main.c -o $(OBJECTS_DIR)/Main.o
+$(OBJECTS_PATH)/Cells_Stack.o: $(SOLVER_SOURCES_PATH)/Cells_Stack.c $(SOLVER_INCLUDES_PATH)/Cells_Stack.h $(SOLVER_INCLUDES_PATH)/Configuration.h
+	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_PATH)/Cells_Stack.c -o $(OBJECTS_PATH)/Cells_Stack.o
 
-$(OBJECTS_DIR)/Grid.o: $(SOLVER_SOURCES_DIR)/Grid.c $(SOLVER_SOURCES_DIR)/Grid.h $(SOLVER_SOURCES_DIR)/Configuration.h $(SOLVER_SOURCES_DIR)/Cells_Stack.h
-	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_DIR)/Grid.c -o $(OBJECTS_DIR)/Grid.o
+$(OBJECTS_PATH)/Grid.o: $(SOLVER_SOURCES_PATH)/Grid.c $(SOLVER_INCLUDES_PATH)/Cells_Stack.h $(SOLVER_INCLUDES_PATH)/Configuration.h $(SOLVER_INCLUDES_PATH)/Grid.h
+	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_PATH)/Grid.c -o $(OBJECTS_PATH)/Grid.o
 
-$(OBJECTS_DIR)/Cells_Stack.o: $(SOLVER_SOURCES_DIR)/Cells_Stack.c $(SOLVER_SOURCES_DIR)/Cells_Stack.h $(SOLVER_SOURCES_DIR)/Configuration.h
-	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_DIR)/Cells_Stack.c -o $(OBJECTS_DIR)/Cells_Stack.o
+$(OBJECTS_PATH)/Main.o: $(SOLVER_SOURCES_PATH)/Main.c $(SOLVER_INCLUDES_PATH)/Configuration.h $(SOLVER_INCLUDES_PATH)/Grid.h
+	$(CC) $(CCFLAGS) -c $(SOLVER_SOURCES_PATH)/Main.c -o $(OBJECTS_PATH)/Main.o
 
-$(OBJECTS_DIR)/Converter.o: $(CONVERTER_SOURCES_DIR)/Converter.c
-	$(CC) $(CCFLAGS) -c $(CONVERTER_SOURCES_DIR)/Converter.c -o $(OBJECTS_DIR)/Converter.o
+$(OBJECTS_PATH)/Converter.o: $(CONVERTER_SOURCES_PATH)/Converter.c
+	$(CC) $(CCFLAGS) -c $(CONVERTER_SOURCES_PATH)/Converter.c -o $(OBJECTS_PATH)/Converter.o
 
 clean:
-	rm -f $(SOLVER_OBJECTS) $(CONVERTER_OBJECTS) $(BINARIES_DIR)/*
+	rm -f $(SOLVER_OBJECTS) $(CONVERTER_OBJECTS) $(BINARIES_PATH)/*

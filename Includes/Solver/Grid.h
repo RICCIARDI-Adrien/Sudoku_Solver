@@ -10,7 +10,7 @@
 #ifndef H_GRID_H
 #define H_GRID_H
 
-#include "Cells_Stack.h"
+#include <Cells_Stack.h>
 
 //-------------------------------------------------------------------------------------------------
 // Constants
@@ -21,7 +21,7 @@
 #define GRID_COLOR_CODE_RED 1
 
 /** Value of an empty cell. */
-#define GRID_EMPTY_CELL_VALUE 0
+#define GRID_EMPTY_CELL_VALUE 1000 // A normally unreacheable value
 
 //-------------------------------------------------------------------------------------------------
 // Functions
@@ -58,7 +58,7 @@ void GridSetCellValue(int Cell_Row, int Cell_Column, int Cell_Value);
  * @param String_File_Name Name of the file describing the grid.
  * @return 0 if the grid was correctly loaded,
  * @return -1 if the file was not found,
- * @return -2 if the grid size is too big,
+ * @return -2 if the grid size is not 6, 9, 12 or 16,
  * @return -3 if the cells data are bad.
  */
 int GridLoadFromFile(char *String_File_Name);
@@ -91,5 +91,10 @@ void GridShowBitmask(unsigned int Bitmask);
  * @param The grid size.
  */
 int GridGetSize(void);
+
+/** Set the starting number value shown when the grid is displayed. Thus, it it possible to display values starting from 0 or starting from 1.
+ * @param Starting_Number The first cells interval's value.
+ */
+void GridSetDisplayStartingNumber(int Starting_Number);
 
 #endif

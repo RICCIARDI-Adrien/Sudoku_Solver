@@ -13,11 +13,12 @@
  * @version 1.1.0 : 25/08/2013, used other approach with bitmasks for rows, columns and squares to greatly improve speed (about 90 times faster).
  * @version 1.1.1 : 16/04/2014, made a little optimization on grid access.
  * @version 1.1.2 : 18/04/2014, used a stack to list the empty cells, the solving is more than 2 times faster.
+ * @version 1.2.0 : 28/04/2014, changed the grid format to a more compact one and enabled automatic grid size detection; the solving algorithm handles now numbers starting from 0 (and not 1 as previously).
  */
+#include <Configuration.h>
+#include <Grid.h>
 #include <stdio.h>
 #include <stdlib.h>
-#include "Configuration.h"
-#include "Grid.h"
 
 //-------------------------------------------------------------------------------------------------
 // Private variables
@@ -64,7 +65,7 @@ static int Backtrack(void)
 	#endif
 	
 	// Try each available number
-	for (Tested_Number = 1; Tested_Number <= Grid_Size; Tested_Number++)
+	for (Tested_Number = 0; Tested_Number < Grid_Size; Tested_Number++)
 	{
 		// Loop until an available number is found
 		if (!(Bitmask_Missing_Numbers & (1 << Tested_Number))) continue;
@@ -105,38 +106,46 @@ static int Backtrack(void)
 //-------------------------------------------------------------------------------------------------
 int main(int argc, char *argv[])
 {
+	char *String_Grid_File_Name;
+	int Starting_Number;
+	
 	// Show the title
 	printf("+---------------+\n");
 	printf("| Sudoku Solver |\n");
 	printf("+---------------+\n\n");
 	
-	// Check if a file name is provided
-	if (argc != 2)
+	// Check parameters
+	if (argc != 3)
 	{
 		printf("Error : bad parameters.\n");
-		printf("Usage : %s File_Name_Sudoku_Grid\n", argv[0]);
-		return -1;
+		printf("Usage : %s DisplayedGridStartingNumber SudokuGridFileName\n", argv[0]);
+		printf("The value DisplayedGridStartingNumber is added to all the numbers when the grid is displayed.\n");
+		return EXIT_FAILURE;
 	}
-	
+	Starting_Number = atoi(argv[1]);
+	String_Grid_File_Name = argv[2];
+
+	GridSetDisplayStartingNumber(Starting_Number);
+
 	// Try to load the grid file
-	switch (GridLoadFromFile(argv[1]))
+	switch (GridLoadFromFile(String_Grid_File_Name))
 	{
 		case -1:
-			printf("Error : can't open file %s.\n", argv[1]);
-			return -1;
+			printf("Error : can't open file %s.\n", String_Grid_File_Name);
+			return EXIT_FAILURE;
 			
 		case -2:
-			printf("Error : grid size is bad.\nThe maximum allowed size is %d.\n", CONFIGURATION_GRID_MAXIMUM_SIZE);
-			return -1;
+			printf("Error : grid size or data is bad.\nThe maximum allowed size is %d.\n", CONFIGURATION_GRID_MAXIMUM_SIZE);
+			return EXIT_FAILURE;
 			
 		case -3:
 			printf("Error : bad grid file. There are not enough numbers to fill the grid.\n");
-			return -1;
+			return EXIT_FAILURE;
 	}
 	Grid_Size = GridGetSize();
 	
 	// Show file name
-	printf("File : %s.\n\n", argv[1]);
+	printf("File : %s.\n\n", String_Grid_File_Name);
 	// Show grid
 	printf("Grid to solve :\n");
 	GridShow();
@@ -150,7 +159,7 @@ int main(int argc, char *argv[])
 		printf("\nSolved grid :\n");
 		GridShow();
 		putchar('\n');
-		return 0;
+		return EXIT_SUCCESS;
 	}
 
 	// Backtracking lead to the original grid, it is not solvable
@@ -158,5 +167,5 @@ int main(int argc, char *argv[])
 	printf("Found grid :\n");
 	GridShow();
 	putchar('\n');
-	return 1;
+	return EXIT_SUCCESS;
 }

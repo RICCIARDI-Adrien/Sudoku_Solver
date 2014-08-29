@@ -1,0 +1,26 @@
+Building the program
+--------------------
+
+There are two available configurations :
+- Type "make" to compile the program in release mode, which is the faster
+  solving mode and does not display debug informations.
+- Type "make debug" to compile the program in debug mode. A lot of debug
+  informations will be displayed and the program will be really slow.
+
+Grid files format
+-----------------
+
+A grid file is a simple text file as following :
+- Each cell number is represented by a single character.
+- There is no space between characters.
+- The length of the lines represents the grid's size.
+- An empty cell is represented by the point character '.'.
+- The accepted grid sizes are 6x6, 9x9, 12x12 and 16x16.
+- The accepted numbers are '0' to 'F' (hexadecimal numbers).
+- Example : here is a 6x6 grid :
+    2.1523
+    .3514.
+    014.52
+    3524.1
+    .03.15
+    5210.4

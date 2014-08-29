@@ -2,16 +2,15 @@
  * @see Grid.h for description.
  * @author Adrien RICCIARDI
  */
+#include <assert.h>
+#include <Cells_Stack.h>
+#include <Configuration.h>
+#include <Grid.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <assert.h>
-#include "Configuration.h"
-#include "Cells_Stack.h"
-#include "Grid.h"
-
 //-------------------------------------------------------------------------------------------------
-// Macros
+// Private macros
 //-------------------------------------------------------------------------------------------------
 /** Get the square index (in the Bitmask_Squares array) in which the cell is located. The formula is Square_Row * Squares_Horizontal_Count + Square_Column.
  * @param Row Cell row coordinate.
@@ -21,7 +20,7 @@
 #define GRID_GET_CELL_SQUARE_INDEX(Row, Column) ((Row / Square_Height) * Squares_Horizontal_Count + (Column / Square_Width))
 
 //-------------------------------------------------------------------------------------------------
-// Variables
+// Private variables
 //-------------------------------------------------------------------------------------------------
 // The grid
 static int Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE];
@@ -29,6 +28,8 @@ static int Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE
 static int Grid_Size;
 // Dimensions of a square in cells
 static int Square_Width, Square_Height, Squares_Horizontal_Count, Squares_Vertical_Count;
+// The grid starting number (usually 0 or 1) added to all cell values when the grid is displayed
+static int Grid_Display_Starting_Number;
 
 // All row bitmasks
 static unsigned int Bitmask_Rows[CONFIGURATION_GRID_MAXIMUM_SIZE];
@@ -44,7 +45,7 @@ static unsigned int Bitmask_Squares[CONFIGURATION_GRID_MAXIMUM_SIZE];
 static inline void GridGenerateInitialBitmasks(void)
 {
 	int Row, Column, Number, Column_Start, Row_End, Column_End, Square_Row, Square_Column, i;
-	int Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE + 1]; // We need to bypass the 0 value which represents an empty cell
+	int Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE];
 	
 	// Parse all rows
 	for (Row = 0; Row < Grid_Size; Row++)
@@ -57,11 +58,11 @@ static inline void GridGenerateInitialBitmasks(void)
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
 			Number = Grid[Row][Column];
-			Is_Number_Found[Number] = 1;
+			if (Number != GRID_EMPTY_CELL_VALUE) Is_Number_Found[Number] = 1;
 		}
 		
-		// Set corresponding bits into bitmask (start from 1 because numbers do so)
-		for (Number = 1; Number <= Grid_Size; Number++)
+		// Set corresponding bits into bitmask
+		for (Number = 0; Number < Grid_Size; Number++)
 		{
 			if (!Is_Number_Found[Number]) Bitmask_Rows[Row] |= 1 << Number;
 		}
@@ -78,11 +79,11 @@ static inline void GridGenerateInitialBitmasks(void)
 		for (Row = 0; Row < Grid_Size; Row++)
 		{
 			Number = Grid[Row][Column];
-			Is_Number_Found[Number] = 1;
+			if (Number != GRID_EMPTY_CELL_VALUE) Is_Number_Found[Number] = 1;
 		}
 		
-		// Set corresponding bits into bitmask (start from 1 because numbers do so)
-		for (Number = 1; Number <= Grid_Size; Number++)
+		// Set corresponding bits into bitmask
+		for (Number = 0; Number < Grid_Size; Number++)
 		{
 			if (!Is_Number_Found[Number]) Bitmask_Columns[Column] |= 1 << Number;
 		}
@@ -111,12 +112,12 @@ static inline void GridGenerateInitialBitmasks(void)
 				for (Column = Column_Start; Column < Column_End; Column++)
 				{
 					Number = Grid[Row][Column];
-					Is_Number_Found[Number] = 1;
+					if (Number != GRID_EMPTY_CELL_VALUE) Is_Number_Found[Number] = 1;
 				}
 			}
 			
-			// Set corresponding bits into bitmask (start from 1 because numbers do so)
-			for (Number = 1; Number <= Grid_Size; Number++)
+			// Set corresponding bits into bitmask
+			for (Number = 0; Number < Grid_Size; Number++)
 			{
 				if (!Is_Number_Found[Number]) Bitmask_Squares[i] |= 1 << Number;
 			}
@@ -144,6 +145,51 @@ static void GridFillStackWithEmptyCells(void)
 	}
 }
 
+/** Read the next line from a grid file.
+ * @param File The file to read from.
+ * @param String_Destination Where to store the read data. The buffer must be at least CONFIGURATION_GRID_MAXIMUM_SIZE + 2 bytes long (+1 to allow to load a 17-characters string and to determinate that the line is too long, and +1 for terminating zero).
+ * @return The size in characters of the read line (without terminating '\n').
+ */
+static int GridReadNextFileLine(FILE *File, char *String_Destination)
+{
+	int Length, New_Line_Character_Index;
+
+	// Try to read the next line.
+	if (fgets(String_Destination, CONFIGURATION_GRID_MAXIMUM_SIZE + 2, File) == NULL) return 0;
+
+	// Remove any trailing '\n' or '\r'
+	Length = strlen(String_Destination);
+	New_Line_Character_Index = Length - 1; // The index in the string where the new line character can be
+	if ((New_Line_Character_Index >= 0) && ((String_Destination[New_Line_Character_Index] == '\n') || (String_Destination[New_Line_Character_Index] == '\r')))
+	{
+		String_Destination[New_Line_Character_Index] = 0;
+		Length--;
+	}
+
+	return Length;
+}
+
+/** Convert a grid character read from a text file into a program operable value.
+ * @param Character The character's value read from the file.
+ * @return GRID_EMPTY_CELL_VALUE if the cell is empty,
+ * @return The corresponding numerical value if the value was recognized,
+ * @return -1 if the character is not an hexadecimal digit or a dot.
+ */
+static int GridConvertCharacterToValue(char Character)
+{
+	// Is the character a digit ?
+	if ((Character >= '0') && (Character <= '9')) return Character - '0';
+
+	// Is the character an hexadecimal alphanumerical value ?
+	if ((Character >= 'A') && (Character <= 'F')) return Character - 'A' + 10; // Plus 10 as the 'A' letter represents 10
+
+	// Is the character an empty cell ?
+	if (Character == '.') return GRID_EMPTY_CELL_VALUE;
+
+	// Bad character
+	return -1;
+}
+
 //-------------------------------------------------------------------------------------------------
 // Public functions
 //-------------------------------------------------------------------------------------------------
@@ -157,7 +203,7 @@ void GridShow(void)
 		{
 			Value = Grid[Row][Column];
 			if (Value == GRID_EMPTY_CELL_VALUE) printf(" . ");
-			else printf("%2d ", Value);
+			else printf("%2d ", Value + Grid_Display_Starting_Number);
 		}
 		putchar('\n');
 	}
@@ -180,7 +226,7 @@ unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
 
 int GridIsCorrectlyFilled(void)
 {
-	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number, Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE + 1];
+	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number, Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE];
 	
 	// Check each row correctness
 	for (Row = 0; Row < Grid_Size; Row++)
@@ -260,23 +306,52 @@ int GridLoadFromFile(char *String_File_Name)
 {
 	FILE *File;
 	int Row, Column, Temp;
+	char String_Line[CONFIGURATION_GRID_MAXIMUM_SIZE + 2] = {0};
 	
-	// Load file
-	File = fopen(String_File_Name, "r");
-	if (File == NULL) return -1; // Error : file not found
+	// Try to open the file
+	File = fopen(String_File_Name, "rb");
+	if (File == NULL) return -1;
 	
-	// Retrieve grid size
-	fscanf(File, "%d", &Grid_Size);
+	// Retrieve the grid size according to the length of the first line
+	Grid_Size = GridReadNextFileLine(File, String_Line);
 	if (Grid_Size > CONFIGURATION_GRID_MAXIMUM_SIZE)
-	{		
+	{
 		fclose(File);
+		#ifdef DEBUG
+			printf("[GridLoadFromFile] First line length is too long.\n");
+		#endif
 		return -2;
 	}
 
-	// Get squares width in cells
-	fscanf(File, "%d", &Square_Width);
-	// Get squares height in cells
-	fscanf(File, "%d", &Square_Height);
+	// Check if the grid size can be handled by the solver
+	switch (Grid_Size)
+	{
+		case 6:
+			Square_Width = 3;
+			Square_Height = 2;
+			break;
+
+		case 9:
+			Square_Width = 3;
+			Square_Height = 3;
+			break;
+
+		case 12:
+			Square_Width = 4;
+			Square_Height = 3;
+			break;
+
+		case 16:
+			Square_Width = 4;
+			Square_Height = 4;
+			break;
+
+		default:
+			#ifdef DEBUG
+				printf("[GridLoadFromFile] Unrecognized grid size.\n");
+			#endif
+			return -2;
+	}
 	
 	// Compute number of squares on grid width and height
 	Squares_Horizontal_Count = Grid_Size / Square_Width;
@@ -285,21 +360,46 @@ int GridLoadFromFile(char *String_File_Name)
 	// Load grid
 	for (Row = 0; Row < Grid_Size; Row++)
 	{
+		// Get each cell value
 		for (Column = 0; Column < Grid_Size; Column++)
 		{
-			// Check if the file really contains each number
-			if (fscanf(File, "%d ", &Temp) == 0)
+			// Get the numerical value of each cell
+			Temp = GridConvertCharacterToValue(String_Line[Column]);
+			if ((Temp != GRID_EMPTY_CELL_VALUE) && (Temp >= Grid_Size))
 			{
-				fclose(File);
+				#ifdef DEBUG
+					printf("[GridLoadFromFile] The read character value (%d) is too big for the grid size.\n", Temp);
+				#endif
 				return -3;
 			}
+			if (Temp == -1)
+			{
+				#ifdef DEBUG
+					printf("[GridLoadFromFile] A bad character was read.\n");
+				#endif
+				return -3;
+			}
+
 			Grid[Row][Column] = Temp;
 		}
+
+		// Load the next line
+		if (Row < Grid_Size - 1) // -1 because the first line was read before entering the loop
+		{
+			Temp = GridReadNextFileLine(File, String_Line);
+			if (Temp != Grid_Size)
+			{
+				#ifdef DEBUG
+					printf("[GridLoadFromFile] The line %d has not the same length than the previous ones (%d).\n", Row + 2, Temp); // +1 because the text editor starts displaying lines from 1, and +1 because the first line was already read (to get the grid size)
+				#endif
+				return -2;
+			}
+		}
 	}
-	
+
 	// The grid was successfully loaded
 	fclose(File);
-	
+
 	// Create first bitmasks
 	GridGenerateInitialBitmasks();
 	
@@ -351,6 +451,11 @@ int GridGetSize(void)
 	return Grid_Size;
 }
 
+void GridSetDisplayStartingNumber(int Starting_Number)
+{
+	Grid_Display_Starting_Number = Starting_Number;
+}
+
 #ifdef DEBUG
 	void GridShowBitmask(unsigned int Bitmask)
 	{
@@ -393,7 +498,7 @@ int GridGetSize(void)
 				}
 				
 				if (Current_Cell_Value == GRID_EMPTY_CELL_VALUE) printf(" . ");
-				else printf("%2d ", Current_Cell_Value);
+				else printf("%2d ", Current_Cell_Value + Grid_Display_Starting_Number);
 				
 				// Restore terminal color
 				if (Has_Color_Changed) printf("\x1B[0m");

@@ -2,9 +2,9 @@
  * @see Cells_Stack.h for description.
  * @author Adrien RICCIARDI
  */
+#include <Cells_Stack.h>
+#include <Configuration.h>
 #include <stdio.h>
-#include "Configuration.h"
-#include "Cells_Stack.h"
 
 //-------------------------------------------------------------------------------------------------
 // Private constants
