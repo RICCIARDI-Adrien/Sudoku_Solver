@@ -22,20 +22,20 @@
 //-------------------------------------------------------------------------------------------------
 // Private variables
 //-------------------------------------------------------------------------------------------------
-// The grid
+/** The grid. */
 static int Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE];
-// Current grid side size in cells
-static int Grid_Size;
-// Dimensions of a square in cells
-static int Square_Width, Square_Height, Squares_Horizontal_Count, Squares_Vertical_Count;
-// The grid starting number (usually 0 or 1) added to all cell values when the grid is displayed
+/** Current grid side size in cells. */
+static unsigned int Grid_Size;
+/** Dimensions of a square in cells. */
+static unsigned int Square_Width, Square_Height, Squares_Horizontal_Count, Squares_Vertical_Count;
+/** The grid starting number (usually 0 or 1) added to all cell values when the grid is displayed. */
 static int Grid_Display_Starting_Number;
 
-// All row bitmasks
+/** All row bitmasks. */
 static unsigned int Bitmask_Rows[CONFIGURATION_GRID_MAXIMUM_SIZE];
-// All column bitmasks
+/** All column bitmasks. */
 static unsigned int Bitmask_Columns[CONFIGURATION_GRID_MAXIMUM_SIZE];
-// All square bitmasks
+/** All square bitmasks. */
 static unsigned int Bitmask_Squares[CONFIGURATION_GRID_MAXIMUM_SIZE];
 
 //-------------------------------------------------------------------------------------------------
@@ -44,7 +44,7 @@ static unsigned int Bitmask_Squares[CONFIGURATION_GRID_MAXIMUM_SIZE];
 /** Create the initial bitmasks for all rows, columns and squares. */
 static inline void GridGenerateInitialBitmasks(void)
 {
-	int Row, Column, Number, Column_Start, Row_End, Column_End, Square_Row, Square_Column, i;
+	unsigned int Row, Column, Number, Column_Start, Row_End, Column_End, Square_Row, Square_Column, i;
 	int Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE];
 	
 	// Parse all rows
@@ -195,7 +195,8 @@ static int GridConvertCharacterToValue(char Character)
 //-------------------------------------------------------------------------------------------------
 void GridShow(void)
 {
-	int Row, Column, Value;
+	unsigned int Row, Column;
+	int Value;
 	
 	for (Row = 0; Row < Grid_Size; Row++)
 	{
@@ -209,7 +210,7 @@ void GridShow(void)
 	}
 }
 
-unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
+unsigned int GridGetCellMissingNumbers(unsigned int Cell_Row, unsigned int Cell_Column)
 {
 	unsigned int Bitmask_Missing_Numbers, Square_Index;
 	
@@ -226,7 +227,8 @@ unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column)
 
 int GridIsCorrectlyFilled(void)
 {
-	int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End, Number, Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE];
+	unsigned int Row, Column, Cell_Row, Cell_Column, Column_Start, Row_End, Column_End;
+	int Number, Is_Number_Found[CONFIGURATION_GRID_MAXIMUM_SIZE];
 	
 	// Check each row correctness
 	for (Row = 0; Row < Grid_Size; Row++)
@@ -290,13 +292,11 @@ int GridIsCorrectlyFilled(void)
 	return 1;
 }
 
-void GridSetCellValue(int Cell_Row, int Cell_Column, int Cell_Value)
+void GridSetCellValue(unsigned int Cell_Row, unsigned int Cell_Column, int Cell_Value)
 {
 	// Check coordinates in debug mode
 	#ifdef DEBUG
-		assert(Cell_Row >= 0);
 		assert(Cell_Row < Grid_Size);
-		assert(Cell_Column >= 0);
 		assert(Cell_Column < Grid_Size);
 	#endif
 	Grid[Cell_Row][Cell_Column] = Cell_Value;
@@ -305,7 +305,7 @@ void GridSetCellValue(int Cell_Row, int Cell_Column, int Cell_Value)
 int GridLoadFromFile(char *String_File_Name)
 {
 	FILE *File;
-	int Row, Column, Temp;
+	unsigned int Row, Column, Temp;
 	char String_Line[CONFIGURATION_GRID_MAXIMUM_SIZE + 2] = {0};
 	
 	// Try to open the file
@@ -372,7 +372,7 @@ int GridLoadFromFile(char *String_File_Name)
 				#endif
 				return -3;
 			}
-			if (Temp == -1)
+			if (Temp == (unsigned int) -1)
 			{
 				#ifdef DEBUG
 					printf("[GridLoadFromFile] A bad character was read.\n");
@@ -410,7 +410,8 @@ int GridLoadFromFile(char *String_File_Name)
 
 int GridGetEmptyCellsCount(void)
 {
-	int Row, Column, Empty_Cells_Count = 0;
+	unsigned int Row, Column;
+	int Empty_Cells_Count = 0;
 	
 	for (Row = 0; Row < Grid_Size; Row++)
 	{
@@ -422,7 +423,7 @@ int GridGetEmptyCellsCount(void)
 	return Empty_Cells_Count;
 }
 
-void GridRemoveCellMissingNumber(int Cell_Row, int Cell_Column, int Number)
+void GridRemoveCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Column, int Number)
 {
 	unsigned int New_Bitmask;
 	
@@ -434,7 +435,7 @@ void GridRemoveCellMissingNumber(int Cell_Row, int Cell_Column, int Number)
 	Bitmask_Squares[GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column)] &= New_Bitmask;
 }
 
-void GridRestoreCellMissingNumber(int Cell_Row, int Cell_Column, int Number)
+void GridRestoreCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Column, int Number)
 {
 	unsigned int New_Bitmask;
 	
@@ -481,7 +482,8 @@ void GridSetDisplayStartingNumber(int Starting_Number)
 	void GridShowDifferences(int Color_Code)
 	{
 		static int Last_Grid[CONFIGURATION_GRID_MAXIMUM_SIZE][CONFIGURATION_GRID_MAXIMUM_SIZE];
-		int Row, Column, Has_Color_Changed, Current_Cell_Value;
+		unsigned int Row, Column;
+		int Has_Color_Changed, Current_Cell_Value;
 		
 		for (Row = 0; Row < Grid_Size; Row++)
 		{

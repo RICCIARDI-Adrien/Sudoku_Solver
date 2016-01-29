@@ -39,7 +39,7 @@ void GridShowDifferences(int Color_Code);
  * @param Cell_Column Column coordinate.
  * @return A bitmask containing all allowed numbers.
  */
-unsigned int GridGetCellMissingNumbers(int Cell_Row, int Cell_Column);
+unsigned int GridGetCellMissingNumbers(unsigned int Cell_Row, unsigned int Cell_Column);
 
 /** Tell if the grid is correctly filled (there is no bad at wrong position).
  * @return 1 if the grid is correctly filled or 0 if not.
@@ -52,7 +52,7 @@ int GridIsCorrectlyFilled(void);
  * @param Cell_Value Value of the cell.
  * @warning No check is done on the provided coordinates, be sure to not cross grid bounds.
  */
-void GridSetCellValue(int Cell_Row, int Cell_Column, int Cell_Value);
+void GridSetCellValue(unsigned int Cell_Row, unsigned int Cell_Column, int Cell_Value);
 
 /** Load the grid content from a file.
  * @param String_File_Name Name of the file describing the grid.
@@ -73,14 +73,14 @@ int GridGetEmptyCellsCount(void);
  * @param Cell_Column Column coordinate of the cell.
  * @param Number The number to remove from the cell missing numbers.
  */
-void GridRemoveCellMissingNumber(int Cell_Row, int Cell_Column, int Number);
+void GridRemoveCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Column, int Number);
 
 /** Restore a number into the cell missing ones lists.
  * @param Cell_Row Row coordinate of the cell.
  * @param Cell_Column Column coordinate of the cell.
  * @param Number The number to restore to the cell missing numbers.
  */
-void GridRestoreCellMissingNumber(int Cell_Row, int Cell_Column, int Number);
+void GridRestoreCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Column, int Number);
 
 /** Show a bitmask in binary representation.
  * @param Bitmask The bitmask to visualize.
@@ -88,7 +88,7 @@ void GridRestoreCellMissingNumber(int Cell_Row, int Cell_Column, int Number);
 void GridShowBitmask(unsigned int Bitmask);
 
 /** Get the grid size in cells.
- * @param The grid size.
+ * @return The grid size.
  */
 int GridGetSize(void);
 
