@@ -42,7 +42,7 @@ SolveList
 
 # Solve all 9x9 grids
 Files_List=`find 9x9_*.txt`
-$Grid_Display_Starting_Number=1
+Grid_Display_Starting_Number=1
 SolveList
 
 # Solve all 12x12 grids
