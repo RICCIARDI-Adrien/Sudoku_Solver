@@ -23,11 +23,13 @@
 //-------------------------------------------------------------------------------------------------
 // Private variables
 //-------------------------------------------------------------------------------------------------
-// How many loops were done
-static unsigned int Loops_Count = 1;
-// How many bad solutions were found before the good one (or before crashing...)
-static unsigned int Bad_Solutions_Found_Count = 0;
-// Cache grid size value (and convert it to unsigned)
+/** How many loops were done. */
+static unsigned long long Loops_Count = 1;
+/** How many bad solutions were found before the good one (or before crashing...). */
+static unsigned long long Bad_Solutions_Found_Count = 0;
+/** How many impossible solutions were avoided. */
+static unsigned long long Avoided_Bad_Solutions_Count = 0;
+/** Cache grid size value (and convert it to unsigned). */
 static unsigned int Grid_Size;
 
 //-------------------------------------------------------------------------------------------------
@@ -68,7 +70,11 @@ static int Backtrack(void)
 	for (Tested_Number = 0; Tested_Number < Grid_Size; Tested_Number++)
 	{
 		// Loop until an available number is found
-		if (!(Bitmask_Missing_Numbers & (1 << Tested_Number))) continue;
+		if (!(Bitmask_Missing_Numbers & (1 << Tested_Number)))
+		{
+			Avoided_Bad_Solutions_Count++;
+			continue;
+		}
 		
 		// Try the number
 		GridSetCellValue(Row, Column, Tested_Number);
@@ -154,8 +160,9 @@ int main(int argc, char *argv[])
 	// Start solving
 	if (Backtrack() == 1)
 	{
-		printf("Grid successfully solved in %u loops.\n", Loops_Count);
-		printf("Bad solutions found before the good one : %u\n", Bad_Solutions_Found_Count);
+		printf("Grid successfully solved in %llu loops.\n", Loops_Count);
+		printf("Bad solutions found before the good one : %llu\n", Bad_Solutions_Found_Count);
+		printf("Avoided bad solutions : %llu\n", Avoided_Bad_Solutions_Count);
 		printf("\nSolved grid :\n");
 		GridShow();
 		putchar('\n');
@@ -167,5 +174,5 @@ int main(int argc, char *argv[])
 	printf("Found grid :\n");
 	GridShow();
 	putchar('\n');
-	return EXIT_SUCCESS;
+	return EXIT_FAILURE;
 }
