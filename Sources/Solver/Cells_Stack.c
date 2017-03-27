@@ -65,7 +65,7 @@ int CellsStackPush(int Cell_Row, int Cell_Column)
 	Stack_Pointer++;
 	
 	#ifdef DEBUG
-		printf("[CellsStackPush] ");
+		printf("[%s] ", __FUNCTION__);
 		CellsStackShow();
 	#endif
 	return 1;
@@ -83,7 +83,7 @@ int CellsStackReadTop(int *Pointer_Cell_Row, int *Pointer_Cell_Column)
 	*Pointer_Cell_Column = Pointer_Cell_Coordinates->Column;
 	
 	#ifdef DEBUG
-		printf("[CellsStackReadTop] ");
+		printf("[%s] ", __FUNCTION__);
 		CellsStackShow();
 	#endif
 	return 1;

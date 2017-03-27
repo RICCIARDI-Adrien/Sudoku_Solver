@@ -9,6 +9,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
 //-------------------------------------------------------------------------------------------------
 // Private macros
 //-------------------------------------------------------------------------------------------------
@@ -318,7 +319,7 @@ int GridLoadFromFile(char *String_File_Name)
 	{
 		fclose(File);
 		#ifdef DEBUG
-			printf("[GridLoadFromFile] First line length is too long.\n");
+			printf("[%s] First line length is too long.\n", __FUNCTION__);
 		#endif
 		return -2;
 	}
@@ -348,7 +349,7 @@ int GridLoadFromFile(char *String_File_Name)
 
 		default:
 			#ifdef DEBUG
-				printf("[GridLoadFromFile] Unrecognized grid size.\n");
+				printf("[%s] Unrecognized grid size.\n", __FUNCTION__);
 			#endif
 			return -2;
 	}
@@ -368,14 +369,14 @@ int GridLoadFromFile(char *String_File_Name)
 			if ((Temp != GRID_EMPTY_CELL_VALUE) && (Temp >= Grid_Size))
 			{
 				#ifdef DEBUG
-					printf("[GridLoadFromFile] The read character value (%d) is too big for the grid size.\n", Temp);
+					printf("[%s] The read character value (%d) is too big for the grid size.\n", __FUNCTION__, Temp);
 				#endif
 				return -3;
 			}
 			if (Temp == (unsigned int) -1)
 			{
 				#ifdef DEBUG
-					printf("[GridLoadFromFile] A bad character was read.\n");
+					printf("[%s] A bad character was read.\n", __FUNCTION__);
 				#endif
 				return -3;
 			}
@@ -390,7 +391,7 @@ int GridLoadFromFile(char *String_File_Name)
 			if (Temp != Grid_Size)
 			{
 				#ifdef DEBUG
-					printf("[GridLoadFromFile] The line %d has not the same length than the previous ones (%d).\n", Row + 2, Temp); // +1 because the text editor starts displaying lines from 1, and +1 because the first line was already read (to get the grid size)
+					printf("[%s] The line %d has not the same length than the previous ones (%d).\n", __FUNCTION__, Row + 2, Temp); // +1 because the text editor starts displaying lines from 1, and +1 because the first line was already read (to get the grid size)
 				#endif
 				return -2;
 			}

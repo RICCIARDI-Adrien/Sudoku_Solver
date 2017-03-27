@@ -51,7 +51,7 @@ static int Backtrack(void)
 		
 		// A bad grid was generated...
 		#ifdef DEBUG
-			printf("[Backtrack] Bad grid generated !\n");
+			printf("[%s] Bad grid generated !\n", __FUNCTION__);
 		#endif
 		return 0;
 	}
@@ -62,7 +62,7 @@ static int Backtrack(void)
 	if (Bitmask_Missing_Numbers == 0) return 0;
 	
 	#ifdef DEBUG
-		printf("[Backtrack] Available numbers for (row %d ; column %d) : ", Row, Column);
+		printf("[%s] Available numbers for (row %d ; column %d) : ", __FUNCTION__, Row, Column);
 		GridShowBitmask(Bitmask_Missing_Numbers);
 	#endif
 	
@@ -83,7 +83,7 @@ static int Backtrack(void)
 		Loops_Count++;
 		
 		#ifdef DEBUG
-			printf("[Backtrack] Modified grid :\n");
+			printf("[%s] Modified grid :\n", __FUNCTION__);
 			GridShowDifferences(GRID_COLOR_CODE_BLUE);
 			putchar('\n');
 		#endif
@@ -98,7 +98,7 @@ static int Backtrack(void)
 		Bad_Solutions_Found_Count++;
 		
 		#ifdef DEBUG
-			printf("[Backtrack] Restored grid :\n");
+			printf("[%s] Restored grid :\n", __FUNCTION__);
 			GridShowDifferences(GRID_COLOR_CODE_RED);
 			putchar('\n');
 		#endif
