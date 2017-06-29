@@ -303,7 +303,7 @@ void GridSetCellValue(unsigned int Cell_Row, unsigned int Cell_Column, int Cell_
 	Grid[Cell_Row][Cell_Column] = Cell_Value;
 }
 
-int GridLoadFromFile(char *String_File_Name)
+int GridLoadFromFile(char *String_File_Name, unsigned int *Pointer_Grid_Size)
 {
 	FILE *File;
 	unsigned int Row, Column, Temp;
@@ -406,6 +406,7 @@ int GridLoadFromFile(char *String_File_Name)
 	
 	// Put the empty cells coordinates into the dedicated stack
 	GridFillStackWithEmptyCells();
+	*Pointer_Grid_Size = Grid_Size;
 	return 0;
 }
 
@@ -446,11 +447,6 @@ void GridRestoreCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Colum
 	Bitmask_Rows[Cell_Row] |= New_Bitmask;
 	Bitmask_Columns[Cell_Column] |= New_Bitmask;
 	Bitmask_Squares[GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column)] |= New_Bitmask;
-}
-
-int GridGetSize(void)
-{
-	return Grid_Size;
 }
 
 void GridSetDisplayStartingNumber(int Starting_Number)

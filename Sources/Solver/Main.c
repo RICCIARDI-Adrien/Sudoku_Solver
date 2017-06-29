@@ -29,7 +29,7 @@ static unsigned long long Loops_Count = 1;
 static unsigned long long Bad_Solutions_Found_Count = 0;
 /** How many impossible solutions were avoided. */
 static unsigned long long Avoided_Bad_Solutions_Count = 0;
-/** Cache grid size value (and convert it to unsigned). */
+/** Cache grid size value. */
 static unsigned int Grid_Size;
 
 //-------------------------------------------------------------------------------------------------
@@ -134,7 +134,7 @@ int main(int argc, char *argv[])
 	GridSetDisplayStartingNumber(Starting_Number);
 
 	// Try to load the grid file
-	switch (GridLoadFromFile(String_Grid_File_Name))
+	switch (GridLoadFromFile(String_Grid_File_Name, &Grid_Size))
 	{
 		case -1:
 			printf("Error : can't open file %s.\n", String_Grid_File_Name);
@@ -148,7 +148,6 @@ int main(int argc, char *argv[])
 			printf("Error : bad grid file. There are not enough numbers to fill the grid.\n");
 			return EXIT_FAILURE;
 	}
-	Grid_Size = GridGetSize();
 	
 	// Show file name
 	printf("File : %s.\n\n", String_Grid_File_Name);

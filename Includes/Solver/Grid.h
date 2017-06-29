@@ -56,12 +56,13 @@ void GridSetCellValue(unsigned int Cell_Row, unsigned int Cell_Column, int Cell_
 
 /** Load the grid content from a file.
  * @param String_File_Name Name of the file describing the grid.
+ * @param Pointer_Grid_Size On output, contain the grid size in cells (6, 9, 12 or 16).
  * @return 0 if the grid was correctly loaded,
  * @return -1 if the file was not found,
  * @return -2 if the grid size is not 6, 9, 12 or 16,
  * @return -3 if the cells data are bad.
  */
-int GridLoadFromFile(char *String_File_Name);
+int GridLoadFromFile(char *String_File_Name, unsigned int *Pointer_Grid_Size);
 
 /** Find the number of empty cells into the current grid.
  * @return The number of emtpy cells.
@@ -86,11 +87,6 @@ void GridRestoreCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Colum
  * @param Bitmask The bitmask to visualize.
  */
 void GridShowBitmask(unsigned int Bitmask);
-
-/** Get the grid size in cells.
- * @return The grid size.
- */
-int GridGetSize(void);
 
 /** Set the starting number value shown when the grid is displayed. Thus, it it possible to display values starting from 0 or starting from 1.
  * @param Starting_Number The first cells interval's value.
