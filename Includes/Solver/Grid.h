@@ -88,9 +88,4 @@ void GridRestoreCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Colum
  */
 void GridShowBitmask(unsigned int Bitmask);
 
-/** Set the starting number value shown when the grid is displayed. Thus, it it possible to display values starting from 0 or starting from 1.
- * @param Starting_Number The first cells interval's value.
- */
-void GridSetDisplayStartingNumber(int Starting_Number);
-
 #endif

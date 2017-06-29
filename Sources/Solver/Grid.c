@@ -453,11 +453,6 @@ void GridRestoreCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Colum
 	Bitmask_Squares[GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column)] |= New_Bitmask;
 }
 
-void GridSetDisplayStartingNumber(int Starting_Number)
-{
-	Grid_Display_Starting_Number = Starting_Number;
-}
-
 #ifdef DEBUG
 	void GridShowBitmask(unsigned int Bitmask)
 	{
