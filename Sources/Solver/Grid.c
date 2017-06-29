@@ -330,21 +330,25 @@ int GridLoadFromFile(char *String_File_Name, unsigned int *Pointer_Grid_Size)
 		case 6:
 			Square_Width = 3;
 			Square_Height = 2;
+			Grid_Display_Starting_Number = 1;
 			break;
 
 		case 9:
 			Square_Width = 3;
 			Square_Height = 3;
+			Grid_Display_Starting_Number = 1;
 			break;
 
 		case 12:
 			Square_Width = 4;
 			Square_Height = 3;
+			Grid_Display_Starting_Number = 1;
 			break;
 
 		case 16:
 			Square_Width = 4;
 			Square_Height = 4;
+			Grid_Display_Starting_Number = 0;
 			break;
 
 		default:

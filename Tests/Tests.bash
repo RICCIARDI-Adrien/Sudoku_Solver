@@ -18,7 +18,7 @@ function PrintFailure
 function PrintSuccess
 {
 	echo -e "\033[32m#########################################"
-	echo -e "## SUCCESS : all tests were successful ##"
+	echo -e "## SUCCESS : all tests were successful ##"
 	echo -e "#########################################\033[0m"
 }
 
@@ -26,7 +26,7 @@ function SolveList
 {
 	for File in $Files_List
 	do
-		$Program $Grid_Display_Starting_Number $File
+		$Program $File
 		if [ $? != 0 ]
 		then
 			PrintFailure
@@ -37,22 +37,18 @@ function SolveList
 
 # Solve all 6x6 grids
 Files_List=`find 6x6_*.txt`
-Grid_Display_Starting_Number=1
 SolveList
 
 # Solve all 9x9 grids
 Files_List=`find 9x9_*.txt`
-Grid_Display_Starting_Number=1
 SolveList
 
 # Solve all 12x12 grids
 Files_List=`find 12x12_*.txt`
-Grid_Display_Starting_Number=1
 SolveList
 
 # Solve all 16x16 grids
 Files_List=`find 16x16_*.txt`
-Grid_Display_Starting_Number=0
 SolveList
 
 PrintSuccess

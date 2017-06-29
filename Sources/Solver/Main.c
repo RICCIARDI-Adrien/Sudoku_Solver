@@ -113,7 +113,6 @@ static int Backtrack(void)
 int main(int argc, char *argv[])
 {
 	char *String_Grid_File_Name;
-	int Starting_Number;
 	
 	// Show the title
 	printf("+---------------+\n");
@@ -121,17 +120,13 @@ int main(int argc, char *argv[])
 	printf("+---------------+\n\n");
 	
 	// Check parameters
-	if (argc != 3)
+	if (argc != 2)
 	{
 		printf("Error : bad parameters.\n");
-		printf("Usage : %s DisplayedGridStartingNumber SudokuGridFileName\n", argv[0]);
-		printf("The value DisplayedGridStartingNumber is added to all the numbers when the grid is displayed.\n");
+		printf("Usage : %s Grid_File_Name\n", argv[0]);
 		return EXIT_FAILURE;
 	}
-	Starting_Number = atoi(argv[1]);
-	String_Grid_File_Name = argv[2];
-
-	GridSetDisplayStartingNumber(Starting_Number);
+	String_Grid_File_Name = argv[1];
 
 	// Try to load the grid file
 	switch (GridLoadFromFile(String_Grid_File_Name, &Grid_Size))
