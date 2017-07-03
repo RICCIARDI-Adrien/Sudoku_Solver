@@ -64,11 +64,6 @@ void GridSetCellValue(unsigned int Cell_Row, unsigned int Cell_Column, int Cell_
  */
 int GridLoadFromFile(char *String_File_Name, unsigned int *Pointer_Grid_Size);
 
-/** Find the number of empty cells into the current grid.
- * @return The number of emtpy cells.
- */
-int GridGetEmptyCellsCount(void);
-
 /** Remove a number from the cell missing ones lists.
  * @param Cell_Row Row coordinate of the cell.
  * @param Cell_Column Column coordinate of the cell.

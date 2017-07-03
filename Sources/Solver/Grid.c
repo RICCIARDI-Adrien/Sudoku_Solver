@@ -414,21 +414,6 @@ int GridLoadFromFile(char *String_File_Name, unsigned int *Pointer_Grid_Size)
 	return 0;
 }
 
-int GridGetEmptyCellsCount(void)
-{
-	unsigned int Row, Column;
-	int Empty_Cells_Count = 0;
-	
-	for (Row = 0; Row < Grid_Size; Row++)
-	{
-		for (Column = 0; Column < Grid_Size; Column++)
-		{
-			if (Grid[Row][Column] == GRID_EMPTY_CELL_VALUE) Empty_Cells_Count++;
-		}
-	}
-	return Empty_Cells_Count;
-}
-
 void GridRemoveCellMissingNumber(unsigned int Cell_Row, unsigned int Cell_Column, int Number)
 {
 	unsigned int New_Bitmask;
