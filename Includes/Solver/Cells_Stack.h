@@ -15,10 +15,8 @@ void CellsStackInitialize(void);
 /** Push a cell coordinates on the top of the stack.
  * @param Cell_Row The cell row coordinate.
  * @param Cell_Column The cell column coordinate.
- * @return 1 if the cell coordinates were correctly pushed,
- * @return 0 if the stack is full.
  */
-int CellsStackPush(int Cell_Row, int Cell_Column);
+void CellsStackPush(int Cell_Row, int Cell_Column);
 
 /** Get the top of the stack without removing it.
  * @param Pointer_Cell_Row On output, will contain the top of stack cell's row coordinate.
@@ -28,7 +26,9 @@ int CellsStackPush(int Cell_Row, int Cell_Column);
  */
 int CellsStackReadTop(int *Pointer_Cell_Row, int *Pointer_Cell_Column);
 
-/** Remove the top of the stack. Do nothing if the stack is empty. */
+/** Remove the top of the stack.
+ * @note Make sure the stack is not empty before calling this function.
+ */
 void CellsStackRemoveTop(void);
 
 #endif

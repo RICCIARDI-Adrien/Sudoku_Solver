@@ -2,6 +2,7 @@
  * @see Cells_Stack.h for description.
  * @author Adrien RICCIARDI
  */
+#include <assert.h>
 #include <Cells_Stack.h>
 #include <Configuration.h>
 #include <stdio.h>
@@ -52,11 +53,11 @@ void CellsStackInitialize(void)
 	Stack_Pointer = 0;
 }
 
-int CellsStackPush(int Cell_Row, int Cell_Column)
+void CellsStackPush(int Cell_Row, int Cell_Column)
 {
 	TCellCoordinates *Pointer_Cell_Coordinates;
 	
-	if (Stack_Pointer >= CELLS_STACK_SIZE) return 0;
+	assert(Stack_Pointer < CELLS_STACK_SIZE);
 	
 	// Cache coordinates address
 	Pointer_Cell_Coordinates = &Stack[Stack_Pointer];
@@ -68,7 +69,6 @@ int CellsStackPush(int Cell_Row, int Cell_Column)
 		printf("[%s] ", __FUNCTION__);
 		CellsStackShow();
 	#endif
-	return 1;
 }
 
 int CellsStackReadTop(int *Pointer_Cell_Row, int *Pointer_Cell_Column)
@@ -91,6 +91,7 @@ int CellsStackReadTop(int *Pointer_Cell_Row, int *Pointer_Cell_Column)
 
 void CellsStackRemoveTop(void)
 {
-	if (Stack_Pointer > 0) Stack_Pointer--;
+	assert(Stack_Pointer > 0);
+	
+	Stack_Pointer--;
 }
-

@@ -9,7 +9,7 @@ CONVERTER_SOURCES_PATH = $(SOURCES_PATH)/Converter
 CC = gcc
 CCFLAGS = -W -Wall -I$(SOLVER_INCLUDES_PATH)
 
-release: CCFLAGS += -O3 -Wl,--strip-all
+release: CCFLAGS += -O3 -fomit-frame-pointer -Wl,--strip-all -DNDEBUG
 release: all
 
 debug: CCFLAGS += -DDEBUG -g
