@@ -216,7 +216,7 @@ unsigned int GridGetCellMissingNumbers(unsigned int Cell_Row, unsigned int Cell_
 	unsigned int Bitmask_Missing_Numbers, Square_Index;
 	
 	// No need to check a filled cell
-	if (Grid[Cell_Row][Cell_Column] != GRID_EMPTY_CELL_VALUE) return 0;
+	assert(Grid[Cell_Row][Cell_Column] == GRID_EMPTY_CELL_VALUE);
 	
 	// Determinate the index of the square where the cell is located
 	Square_Index = GRID_GET_CELL_SQUARE_INDEX(Cell_Row, Cell_Column);
@@ -296,10 +296,9 @@ int GridIsCorrectlyFilled(void)
 void GridSetCellValue(unsigned int Cell_Row, unsigned int Cell_Column, int Cell_Value)
 {
 	// Check coordinates in debug mode
-	#ifdef DEBUG
-		assert(Cell_Row < Grid_Size);
-		assert(Cell_Column < Grid_Size);
-	#endif
+	assert(Cell_Row < Grid_Size);
+	assert(Cell_Column < Grid_Size);
+
 	Grid[Cell_Row][Cell_Column] = Cell_Value;
 }
 
